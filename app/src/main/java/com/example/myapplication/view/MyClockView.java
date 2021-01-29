@@ -36,12 +36,12 @@ public class MyClockView extends View {
     private int clockWidth;//相当于是时钟的圆心
 
     //时,分,秒
-    private float cH,cM,cS;
+    private int cH,cM,cS;
 
     //拖动标识
     private boolean isDragging =false;
     //当前拖动指针标识，开始拖动时的角度（用于）
-    private int draggingPointer,draggingStartDegree;
+    private int draggingPointer,lastDraggingDegree=1;
 
     /**
      * 定时器
@@ -51,17 +51,7 @@ public class MyClockView extends View {
         @Override
         public void run() {
             if (draggingPointer==0){
-                if (cS >= 60) {
-                    cS = 0;
-                    cM++;
-                }
-                if (cM >= 60){
-                    cM = 0;
-                    cH++;
-                }
-                if (cH >= 12){
-                    cH = 0;
-                }
+                maintainTime();
                 cS++;
                 //子线程用postInvalidate
                 postInvalidate();
@@ -99,8 +89,8 @@ public class MyClockView extends View {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         int measureWidth = MeasureSpec.getSize(widthMeasureSpec);
         int measureHeight = MeasureSpec.getSize(heightMeasureSpec);
-        int measureWidthMode = MeasureSpec.getMode(widthMeasureSpec);
-        int measureHeightMode = MeasureSpec.getMode(heightMeasureSpec);
+        final int measureWidthMode = MeasureSpec.getMode(widthMeasureSpec);
+        final int measureHeightMode = MeasureSpec.getMode(heightMeasureSpec);
         switch (measureWidthMode) {
             case MeasureSpec.UNSPECIFIED:
                 measureWidth = getSuggestedMinimumWidth();
@@ -187,7 +177,7 @@ public class MyClockView extends View {
         for (int i = 1; i <= 11; i++) {
             angle+=30;
             canvas.rotate(30);
-            String number=String.valueOf(i);
+            final String number=String.valueOf(i);
             clockNumberPaint.getTextBounds(number,0,number.length(),rect);
             canvas.drawText(number,-rect.width()/2,-clockRadius+clockRingWidth/2+clockSpecialScaleHeight+rect.height()+10,clockNumberPaint);
         }
@@ -225,27 +215,27 @@ public class MyClockView extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        float x=event.getX(),y=event.getY();
+        final float x=event.getX(),y=event.getY();
         if (event.getAction() == MotionEvent.ACTION_MOVE) {
-            int degree=getDegreeBetweenLines(x,y);
+            final int degree=getDegreeBetweenLines(x,y);
             if (!isDragging){//开始拖动时判断当前操作的指针，抬起手指清除标志
                 isDragging =true;
-                int distance= (int) Math.pow(Math.pow(clockWidth-x,2)+Math.pow(clockWidth-y,2),0.5);//到圆心的距离
+                final int distance= (int) Math.pow(Math.pow(clockWidth-x,2)+Math.pow(clockWidth-y,2),0.5);//到圆心的距离
                 if (distance<clockRadius*0.8){//可能是操作指针
                     int hDegree,mDegree,sDegree;
                     if (distance>clockRadius*0.7){//可能是秒针
-                        sDegree= (int) (cS*6);
+                        sDegree=(cS*6);
                         if (Math.abs(sDegree-degree)<=10){//允许触碰误差在10°以内
                             draggingPointer=PS;
                         }else {//不是拖动指针
                             draggingPointer=0;
                         }
                     }else if (distance>clockRadius*0.5){//可能是分针或秒针
-                        sDegree= (int) (cS*6);
-                        mDegree= (int) (cM*6+cS/10);
-                        int sDiff=Math.abs(sDegree-degree);
-                        int mDiff=Math.abs(mDegree-degree);
-                        int min=Math.min(sDiff,mDiff);
+                        sDegree=(cS*6);
+                        mDegree=(cM*6+cS/10);
+                        final int sDiff=Math.abs(sDegree-degree);
+                        final int mDiff=Math.abs(mDegree-degree);
+                        final int min=Math.min(sDiff,mDiff);
                         if (min==sDiff&&sDiff<=10){//是秒针
                             draggingPointer=PS;
                         }else if (min==mDiff&&mDiff<=10){//是分针
@@ -254,13 +244,13 @@ public class MyClockView extends View {
                             draggingPointer=0;
                         }
                     }else {//可能是任意指针
-                        sDegree= (int) (cS*6);
-                        mDegree= (int) (cM*6+cS/10);
-                        hDegree= (int) (cH*30+cM/2+cS/60/10);
-                        int sDiff=Math.abs(sDegree-degree);
-                        int mDiff=Math.abs(mDegree-degree);
-                        int hDiff=Math.abs(hDegree-degree);
-                        int min=Math.min(sDiff,Math.min(mDiff,hDiff));
+                        sDegree=(cS*6);
+                        mDegree=(cM*6+cS/10);
+                        hDegree=(cH*30+cM/2+cS/60/10);
+                        final int sDiff=Math.abs(sDegree-degree);
+                        final int mDiff=Math.abs(mDegree-degree);
+                        final int hDiff=Math.abs(hDegree-degree);
+                        final int min=Math.min(sDiff,Math.min(mDiff,hDiff));
                         if (min==sDiff&&sDiff<=10){//是秒针
                             draggingPointer=PS;
                         }else if (min==mDiff&&mDiff<=10){//是分针
@@ -277,8 +267,6 @@ public class MyClockView extends View {
                 switch (draggingPointer){
                     case PS:
                         cS=degree/6;
-                        cM+=cS/60;
-                        cH+=cM/12;
                         break;
                     case PM:
                         cM=(degree-cS/10)/6;
@@ -291,14 +279,32 @@ public class MyClockView extends View {
                         break;
                     default:
                 }
-                Log.d(TAG, "onTouchEvent: cS="+cS+"     cM="+cM+"     cH="+cH);
+                if (lastDraggingDegree!=-1){
+                    if (degree<=45&&lastDraggingDegree>=315){//从0°左滑到右
+                        switch (draggingPointer){
+                            case PS: cM++;break;
+                            case PM: cH++;break;
+                            default:
+                        }
+                    }else if(degree>=315&&lastDraggingDegree<=45) {//从0°右滑到左
+                        switch (draggingPointer){
+                            case PS: cM--;break;
+                            case PM: cH--;break;
+                            default:
+                        }
+                    }
+                }
+                maintainTime();
+                lastDraggingDegree=degree;
                 if (draggingPointer!=0){
                     postInvalidate();
                 }
+                Log.d(TAG, "onTouchEvent: cH="+cH+"     cM="+cM+"     cS="+cS);
             }
         }else if (event.getAction() == MotionEvent.ACTION_UP){
             isDragging =false;
             draggingPointer=0;
+            lastDraggingDegree=-1;
         }
         return true;
     }
@@ -307,6 +313,19 @@ public class MyClockView extends View {
         mTimer.schedule(task,0,1000);
     }
 
+    private void maintainTime(){
+        if (cS >= 60) {
+            cS = 0;
+            cM++;
+        }
+        if (cM >= 60){
+            cM = 0;
+            cH++;
+        }
+        if (cH >= 12){
+            cH = 0;
+        }
+    }
     private int getDegreeBetweenLines(float x, float y){
         double degree = 0;
         if (x>clockWidth&&y<clockWidth){//第一象限
