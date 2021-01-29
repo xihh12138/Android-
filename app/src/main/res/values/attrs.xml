@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="MyClockView">
+        <attr name="clockRingWidth" format="dimension"/><!--外圈的宽度-->
+        <attr name="clockDefaultScaleWidth" format="dimension"/><!--普通刻度的宽度-->
+        <attr name="clockDefaultScaleHeight" format="dimension"/><!--普通刻度的高度-->
+        <attr name="clockSpecialScaleWidth" format="dimension"/><!--整点刻度的宽度-->
+        <attr name="clockSpecialScaleHeight" format="dimension"/><!--整点刻度的高度-->
+        <attr name="clockHWidth" format="dimension"/><!--时针的宽度-->
+        <attr name="clockMWidth" format="dimension"/><!--分针的宽度-->
+        <attr name="clockSWidth" format="dimension"/><!--秒针的宽度-->
+
+        <attr name="clockRingColor" format="color"/><!--外圈的颜色-->
+        <attr name="clockScaleColor" format="color"/><!--刻度的颜色-->
+        <attr name="clockNumberColor" format="color"/><!--数字的颜色-->
+        <attr name="clockHColor" format="color"/><!--时针的颜色-->
+        <attr name="clockMColor" format="color"/><!--分针的颜色-->
+        <attr name="clockSColor" format="color"/><!--秒针的颜色-->
+    </declare-styleable>
+</resources>
