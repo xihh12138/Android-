@@ -28,7 +28,7 @@ public class MyClockView extends View {
             clockDefaultScaleWidth,clockDefaultScaleHeight,clockSpecialScaleWidth, clockSpecialScaleHeight,
             clockHWidth,clockMWidth,clockSWidth;
 
-    private int clockRingColor,clockScaleColor,clockNumberColor,
+    private int clockRingColor,clockScaleColor, clockScaleNumberColor,
             clockHColor,clockMColor,clockSColor;
 
     //时钟半径,时钟宽度
@@ -76,7 +76,7 @@ public class MyClockView extends View {
 
         clockRingColor=typedArray.getColor(R.styleable.MyClockView_clockRingColor, Color.DKGRAY);
         clockScaleColor=typedArray.getColor(R.styleable.MyClockView_clockScaleColor, Color.LTGRAY);
-        clockNumberColor=typedArray.getColor(R.styleable.MyClockView_clockNumberColor, Color.BLACK);
+        clockScaleNumberColor =typedArray.getColor(R.styleable.MyClockView_clockScaleNumberColor, Color.BLACK);
         clockHColor=typedArray.getColor(R.styleable.MyClockView_clockHColor, Color.BLACK);
         clockMColor=typedArray.getColor(R.styleable.MyClockView_clockMColor, Color.GRAY);
         clockSColor=typedArray.getColor(R.styleable.MyClockView_clockSColor, Color.RED);
@@ -132,8 +132,9 @@ public class MyClockView extends View {
         super.onDraw(canvas);
         canvas.translate(clockWidth, clockWidth);
         drawCircle(canvas);
-        drawNumber(canvas);
+        drawScaleNumber(canvas);
         drawPointer(canvas);
+        drawTimeNumber(canvas);
     }
 
     /**
@@ -164,22 +165,22 @@ public class MyClockView extends View {
      * 画刻度上的数字
      * @param canvas
      */
-    private void drawNumber(Canvas canvas){
+    private void drawScaleNumber(Canvas canvas){
         //数字的画笔
         int angle=0;
-        Paint clockNumberPaint=new Paint(Paint.ANTI_ALIAS_FLAG);
-        clockNumberPaint.setStyle(Paint.Style.FILL);
-        clockNumberPaint.setTextSize(clockWidth/10);
-        clockNumberPaint.setColor(clockNumberColor);
+        Paint clockScaleNumberPaint=new Paint(Paint.ANTI_ALIAS_FLAG);
+        clockScaleNumberPaint.setStyle(Paint.Style.FILL);
+        clockScaleNumberPaint.setTextSize(clockWidth/10);
+        clockScaleNumberPaint.setColor(clockScaleNumberColor);
         Rect rect=new Rect();
-        clockNumberPaint.getTextBounds("12",0,2,rect);
-        canvas.drawText("12",-rect.width()/2-5,-clockRadius+clockRingWidth/2+clockSpecialScaleHeight+rect.height()+10,clockNumberPaint);
+        clockScaleNumberPaint.getTextBounds("12",0,2,rect);
+        canvas.drawText("12",-rect.width()/2-5,-clockRadius+clockRingWidth/2+clockSpecialScaleHeight+rect.height()+10,clockScaleNumberPaint);
         for (int i = 1; i <= 11; i++) {
             angle+=30;
             canvas.rotate(30);
             final String number=String.valueOf(i);
-            clockNumberPaint.getTextBounds(number,0,number.length(),rect);
-            canvas.drawText(number,-rect.width()/2,-clockRadius+clockRingWidth/2+clockSpecialScaleHeight+rect.height()+10,clockNumberPaint);
+            clockScaleNumberPaint.getTextBounds(number,0,number.length(),rect);
+            canvas.drawText(number,-rect.width()/2,-clockRadius+clockRingWidth/2+clockSpecialScaleHeight+rect.height()+10,clockScaleNumberPaint);
         }
         canvas.rotate(30);
     }
@@ -211,6 +212,20 @@ public class MyClockView extends View {
         canvas.rotate(cS*6);
         canvas.drawLine(0,0,0, -(float) (clockRadius*0.8),clockPointerPaint);
         canvas.restore();
+    }
+
+    private void drawTimeNumber(Canvas canvas){
+        Paint clockTimeNumberPaint=new Paint(Paint.ANTI_ALIAS_FLAG);
+        clockTimeNumberPaint.setStyle(Paint.Style.FILL);
+        clockTimeNumberPaint.setTextSize(clockWidth/7);
+        clockTimeNumberPaint.setColor(Color.BLACK);
+        String currentTime=new StringBuilder()
+                .append(cH>=10?cH:"0"+cH).append(":")
+                .append(cM>=10?cM:"0"+cM).append(":")
+                .append(cS>=10?cS:"0"+cS).toString();
+        Rect rect=new Rect();
+        clockTimeNumberPaint.getTextBounds(currentTime,0,currentTime.length(),rect);
+        canvas.drawText(currentTime,clockRingWidth-rect.width()/2, clockRingWidth+clockRadius*0.5f,clockTimeNumberPaint);
     }
 
     @Override
@@ -282,8 +297,12 @@ public class MyClockView extends View {
                 if (lastDraggingDegree!=-1){
                     if (degree<=45&&lastDraggingDegree>=315){//从0°左滑到右
                         switch (draggingPointer){
-                            case PS: cM++;break;
-                            case PM: cH++;break;
+                            case PS:
+                                cM++;
+                                break;
+                            case PM:
+                                cH++;
+                                break;
                             default:
                         }
                     }else if(degree>=315&&lastDraggingDegree<=45) {//从0°右滑到左
@@ -321,9 +340,14 @@ public class MyClockView extends View {
         if (cM >= 60){
             cM = 0;
             cH++;
+        }else if (cM<0){
+            cM=59;
+            cH--;
         }
         if (cH >= 12){
             cH = 0;
+        }else if (cH<0){
+            cH=11;
         }
     }
     private int getDegreeBetweenLines(float x, float y){

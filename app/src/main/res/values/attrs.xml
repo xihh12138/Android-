@@ -12,7 +12,7 @@
 
         <attr name="clockRingColor" format="color"/><!--外圈的颜色-->
         <attr name="clockScaleColor" format="color"/><!--刻度的颜色-->
-        <attr name="clockNumberColor" format="color"/><!--数字的颜色-->
+        <attr name="clockScaleNumberColor" format="color"/><!--数字的颜色-->
         <attr name="clockHColor" format="color"/><!--时针的颜色-->
         <attr name="clockMColor" format="color"/><!--分针的颜色-->
         <attr name="clockSColor" format="color"/><!--秒针的颜色-->
