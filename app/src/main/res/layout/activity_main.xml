@@ -6,25 +6,10 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <com.example.myapplication.view.CustomTopActionBar
-        android:id="@+id/ctab_actionbar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"/>
-
-    <com.example.myapplication.view.CustomView
-        android:id="@+id/cv_count1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/ctab_actionbar"
-        android:layout_centerInParent="true"
-        android:layout_margin="10dp"/>
-
     <com.example.myapplication.view.MyClockView
         android:id="@+id/mcv_myClock"
         android:layout_width="300dp"
         android:layout_height="300dp"
-        android:layout_below="@id/cv_count1"
-        android:layout_centerHorizontal="true"/>
+        android:layout_centerInParent="true"/>
 
 </RelativeLayout>
